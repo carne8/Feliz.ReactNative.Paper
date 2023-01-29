@@ -5,12 +5,14 @@ open Fable.Core.JsInterop
 open Feliz
 open Feliz.ReactNative
 
+type IThemeFonts = interface end
 type Theme =
     {| dark: bool
        version: int
        mode: string option
        roundness: int
        animation: {| scale: float |}
+       fonts: IThemeFonts
        colors:
          {| primary: string
             primaryContainer: string
@@ -50,9 +52,13 @@ type Theme =
                 level4: string
                 level5: string |} |} |}
 
+module Theme =
+    let inline defaultLight () : Theme = import "MD3LightTheme" "react-native-paper" |> unbox<Theme>
+    let inline defaultDark () : Theme = import "MD3DarkTheme" "react-native-paper" |> unbox<Theme>
+    let inline withFonts fonts (theme: Theme) : Theme =
+        {| theme with fonts = (import "configureFonts" "react-native-paper") {| config = fonts |} |}
 
-[<Erase>]
-type prop =
+type [<Erase>] prop =
     static member inline animating (value: bool) = Interop.mkAttr "animating" value
     static member inline size (value: float) = Interop.mkAttr "size" value
     static member inline hidesWhenStopped (value: bool) = Interop.mkAttr "hidesWhenStopped" value
@@ -154,15 +160,13 @@ module Paper =
     let inline private PaperSubElement parent (element: string) (props: #seq<IReactProperty>) : ReactElement =
         Interop.createElement (import parent "react-native-paper")?(element) (createObj !!props)
 
-    [<Erase>]
-    type Appbar =
+    type [<Erase>] Appbar =
         static member inline Action props = PaperSubElement "Appbar" "Action" props
         static member inline BackAction props = PaperSubElement "Appbar" "BackAction" props
         static member inline Content props = PaperSubElement "Appbar" "Content" props
         static member inline Header props = PaperSubElement "Appbar" "Header" props
 
-    [<Erase>]
-    type Avatar =
+    type [<Erase>] Avatar =
         static member inline Icon props = PaperSubElement "Avatar" "Icon" props
         static member inline Image props = PaperSubElement "Avatar" "Image" props
         static member inline Text props = PaperSubElement "Avatar" "Text" props
